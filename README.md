@@ -2,6 +2,6 @@
 Python 3.11 Parser written in Rust.
 
 
-cargo build
-cargo test
-cargo run
+- cargo build
+- cargo test
+- cargo run
