@@ -1,5 +1,6 @@
 use crate::parser::abstract_syntax_tree::AbstractSyntaxNodes;
-use crate::parser::python_core_parser::PythonCoreParser;
+use crate::parser::python_core_parser::{PythonCoreParser, PythonParser};
+use crate::parser::symbols::*;
 
 // Trait: Expression rules ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -49,7 +50,33 @@ trait Expressions {
 impl Expressions for PythonCoreParser {
 
     fn ParseAtom( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        match &*self.symbol.clone() {
+            Ok( s ) => {
+                let symbol1 = s.clone();
+                self.advance();
+                match &*symbol1 {
+                    Symbols::PyEllipsis( _ , _  ) =>
+                        Ok( Box::new ( AbstractSyntaxNodes::Ellipsis( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
+                    Symbols::PyFalse( _ , _  ) =>
+                        Ok( Box::new ( AbstractSyntaxNodes::False( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
+                    Symbols::PyNone( _ , _  ) =>
+                        Ok( Box::new ( AbstractSyntaxNodes::None( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
+                    Symbols::PyTrue( _ , _  ) =>
+                        Ok( Box::new ( AbstractSyntaxNodes::True( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
+                    Symbols::PyName( _ , _ , _  ) =>
+                        Ok( Box::new ( AbstractSyntaxNodes::Name( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
+                    Symbols::PyNumber( _ , _ , _  ) =>
+                        Ok( Box::new ( AbstractSyntaxNodes::Number( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
+                    // Symbols::PyString( _ , _ , _  ) => (),
+                    // Symbols::PyLeftParen( _ , _  ) => (),
+                    // Symbols::PyLeftBracket( _ , _  ) => (),
+                    // Symbols::PyLeftCurly( _ , _  ) => (),
+                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                }
+            },
+            _ =>    Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+        }
     }
 
     fn ParseAtomExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {

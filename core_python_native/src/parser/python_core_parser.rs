@@ -1,6 +1,7 @@
 
 use crate::parser::symbols::*;
 
+
 pub struct PythonCoreParser {
     pub(crate) symbol: Box<Result<Box<Symbols>, Box<String>>>
 
@@ -24,7 +25,7 @@ impl PythonParser for PythonCoreParser {
     }
 
     fn advance(&mut self) -> () {
-
+        self.symbol = Box::new( Ok( Box::new( Symbols::PyEllipsis( 0, 2 ) ) ) )
     }
 
     fn symbol_position( &mut self ) -> u32 {
