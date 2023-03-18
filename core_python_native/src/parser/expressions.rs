@@ -269,6 +269,7 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule: ( '+' | '-' | '~' ) factor | power
     fn parse_factor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         let start_pos = self.symbol_position();
         match &*self.symbol {
@@ -299,8 +300,51 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule: factor [ ( '*'  | '/' | '//' | '%' | '@' ) factor ]
     fn parse_term( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut left_node = self.parse_factor()?;
+        while   match &*self.symbol.clone() {
+                    Ok(symbol_x) => {
+                        let symbol = (*symbol_x).clone();
+                        match &*symbol {
+                            Symbols::PyMul( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_factor()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Mul(start_pos, self.current_position(),left_node, symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyDiv( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_factor()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Div(start_pos, self.current_position(),left_node, symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyFloorDiv( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_factor()?;
+                                left_node = Box::new(AbstractSyntaxNodes::FloorDiv(start_pos, self.current_position(),left_node, symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyModulo( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_factor()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Modulo(start_pos, self.current_position(), left_node, symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyMatrices( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_factor()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Matrices(start_pos, self.current_position(),left_node, symbol.to_owned(), right_node));
+                                true
+                            },
+                            _ => false
+                        }
+                    },
+                    _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        } {};
+
+        Ok(left_node)
     }
 
     fn parse_arith_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
