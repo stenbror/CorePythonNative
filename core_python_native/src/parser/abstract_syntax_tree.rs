@@ -66,8 +66,8 @@ pub enum AbstractSyntaxNodes {
     List                    ( u32, u32, Box<Symbols>, Option<Box<AbstractSyntaxNodes>>, Box<Symbols> ),
     PowerKey                ( u32, u32, Box<Symbols>, Box<AbstractSyntaxNodes> ),
     DictionaryEntry         ( u32, u32, Box<AbstractSyntaxNodes>, Box<Symbols>, Box<AbstractSyntaxNodes> ),
-    Dictionary              (u32, u32, Box<Symbols>, Option<Box<AbstractSyntaxNodes>>, Box<Symbols> ),
-    Set                     (u32, u32, Box<Symbols>, Option<Box<AbstractSyntaxNodes>>, Box<Symbols> ),
+    Dictionary              ( u32, u32, Box<Symbols>, Option<Box<AbstractSyntaxNodes>>, Box<Symbols> ),
+    Set                     ( u32, u32, Box<Symbols>, Option<Box<AbstractSyntaxNodes>>, Box<Symbols> ),
     ArgumentList            ( u32, u32, Box<[Box<AbstractSyntaxNodes>]>, Box<[Box<Symbols>]> ),
     Argument                ( u32, u32, Option<Box<AbstractSyntaxNodes>>, Option<Box<Symbols>>, Box<AbstractSyntaxNodes> )
 }
