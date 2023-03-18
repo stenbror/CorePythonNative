@@ -7,40 +7,40 @@ use crate::parser::symbols::*;
 trait Expressions {
     fn parse_atom( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn parse_atom_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParsePower( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseFactor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseTerm( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseArithExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseShiftExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseAndExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseXorExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseOrExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseStarExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseComparison( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseNotTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseAndTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseOrTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseLambda( &mut self, is_cond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseTestNoCond( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseNamedExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_power( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_factor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_term( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_arith_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_shift_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_and_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_xor_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_or_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_star_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_comparison( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_not_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_and_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_or_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_lambda( &mut self, is_cond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_test_no_cond( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_named_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn parse_testlist_comp( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseTrailer( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseSubscriptList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseSubscript( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseTestList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseExprList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseDictionaryOrSetMaker( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseCompIter( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseSyncCompFor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseCompFor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseCompIf( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseVarArgsList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseVFPDef( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_trailer( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_subscript_list( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_subscript( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_testlist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_exprlist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_dictionary_or_set_maker( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_comp_iter( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_sync_comp_for( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_comp_for( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_comp_if( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_var_argslist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_vfp_def( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn parse_yield_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseTestListStarExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseArgList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseArgument( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_testlist_star_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_arglist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_argument( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
 }
 
 
@@ -151,7 +151,49 @@ impl Expressions for PythonCoreParser {
                             _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ))
                         }
                     },
-                    // Symbols::PyLeftCurly( _ , _  ) => (),
+                    Symbols::PyLeftCurly( _ , _  ) => {
+                        let mut right : Option<Box<AbstractSyntaxNodes>> = None;
+
+                        match &*self.symbol.clone() {
+                            Ok(s) => {
+                                match **s {
+                                    Symbols::PyRightCurly( .. ) => { },
+                                    _ => {
+                                        right = Some( self.parse_dictionary_or_set_maker()? );
+                                    }
+                                }
+                            },
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                        }
+
+                        match &*self.symbol.clone() {
+                            Ok(s2) => {
+                                match **s2 {
+                                    Symbols::PyRightCurly(..) => {
+                                        let symbol2 = (*s2).clone();
+                                        self.advance();
+                                        match right {
+                                            Some( ref a ) => {
+                                                match &**a {
+                                                    AbstractSyntaxNodes::DictionaryContainer( .. ) => {
+                                                        Ok( Box::new(AbstractSyntaxNodes::Dictionary(start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned())))
+                                                    },
+                                                    AbstractSyntaxNodes::SetContainer( .. ) => {
+                                                        Ok( Box::new(AbstractSyntaxNodes::Set(start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned())))
+                                                    },
+                                                    _ => Ok( Box::new(AbstractSyntaxNodes::Dictionary(start_pos, self.current_position(), symbol1.to_owned(), None, symbol2.to_owned())))
+                                                }
+                                            },
+                                            None => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                                        }
+                                    },
+                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                                }
+                            },
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                        }
+
+                    },
                     _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
                 }
             },
@@ -163,71 +205,71 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParsePower( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_power( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseFactor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_factor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseTerm( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_term( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseArithExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_arith_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseShiftExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_shift_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseAndExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_and_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseXorExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_xor_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseOrExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_or_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseStarExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_star_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseComparison( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_comparison( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseNotTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_not_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseAndTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_and_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseOrTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_or_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseLambda( &mut self, is_cond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_lambda( &mut self, is_cond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseTestNoCond( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_test_no_cond( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseNamedExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_named_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
@@ -235,51 +277,51 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseTrailer( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_trailer( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseSubscriptList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_subscript_list( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseSubscript( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_subscript( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseTestList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_testlist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseExprList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_exprlist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseDictionaryOrSetMaker( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_dictionary_or_set_maker( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseCompIter( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_comp_iter( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseSyncCompFor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_sync_comp_for( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseCompFor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_comp_for( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseCompIf( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_comp_if( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseVarArgsList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_var_argslist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseVFPDef( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_vfp_def( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
@@ -287,15 +329,15 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseTestListStarExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_testlist_star_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseArgList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_arglist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseArgument( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_argument( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 }
