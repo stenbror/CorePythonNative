@@ -10,7 +10,7 @@ pub enum AbstractSyntaxNodes {
     Ellipsis                ( u32, u32, Box<Symbols> ),
     Name                    ( u32, u32, Box<Symbols> ),
     Number                  ( u32, u32, Box<Symbols> ),
-    String                  ( u32, u32, Box<[ Box<Symbols> ]>),
+    String                  ( u32, u32, Box<Vec<Box<Symbols>>>),
     AtomExpr                ( u32, u32, Option<Box<Symbols>>, Box<AbstractSyntaxNodes>, Option<Box<AbstractSyntaxNodes>> ),
     Power                   ( u32, u32, Box<AbstractSyntaxNodes>, Box<Symbols>, Box<AbstractSyntaxNodes> ),
     UnaryPlus               ( u32, u32, Box<Symbols>, Box<AbstractSyntaxNodes> ),

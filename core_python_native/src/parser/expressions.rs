@@ -68,7 +68,28 @@ impl Expressions for PythonCoreParser {
                         Ok( Box::new ( AbstractSyntaxNodes::Name( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
                     Symbols::PyNumber( _ , _ , _  ) =>
                         Ok( Box::new ( AbstractSyntaxNodes::Number( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
-                    // Symbols::PyString( _ , _ , _  ) => (),
+                    Symbols::PyString( _ , _ , _  ) => {
+                        let mut lst: Vec<Box<Symbols>> = Vec::new();
+                        lst.push( symbol1.to_owned() );
+
+                        while   match &*self.symbol.clone() {
+                                    Ok( s ) => {
+                                        let symbol2 = (*s).clone();
+                                        match *symbol2 {
+                                            Symbols::PyString( _ , _ , _ ) => {
+                                                self.advance();
+                                                lst.push( symbol2.to_owned() );
+                                                true
+                                            },
+                                            _ => false
+                                        }
+                                    },
+                                    _ => false
+                                } {}
+
+                        lst.reverse();
+                        Ok( Box::new( AbstractSyntaxNodes::String( start_pos, self.symbol_position() - 1, Box::new( lst.to_owned() ) ) ) )
+                    },
                     // Symbols::PyLeftParen( _ , _  ) => (),
                     // Symbols::PyLeftBracket( _ , _  ) => (),
                     // Symbols::PyLeftCurly( _ , _  ) => (),
