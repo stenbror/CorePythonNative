@@ -204,9 +204,52 @@ impl Expressions for PythonCoreParser {
 
     // Rule: [ await? ] atom [ trailer* ]
     fn parse_atom_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+
+        let await_symbol = match *self.symbol.clone() {
+                                    Ok(s) => {
+                                        let symbol1 = s.clone();
+                                        match &*symbol1 {
+                                            Symbols::PyAwait( .. ) => {
+                                                let _ = &self.advance();
+                                                Some( symbol1.to_owned() )
+                                            },
+                                            _ => None
+                                        }
+                                    },
+                                    _ => None
+                                };
+
+        let right = self.parse_atom_expr()?;
+
+        let mut lst : Vec<Box<AbstractSyntaxNodes>> = Vec::new();
+        while   match *self.symbol.clone() {
+                    Ok(s) => {
+                        match *s {
+                            Symbols::PyLeftParen(..) |
+                            Symbols::PyLeftBracket(..) |
+                            Symbols::PyDot(..) => {
+                                let trailer = self.parse_trailer()?;
+                                lst.push( trailer.to_owned() );
+                                true
+                            },
+                            _ => false
+                        }
+                    },
+                    _ => false
+                } {};
+        lst.reverse();
+
+        match ( &await_symbol, lst.len() ) {
+            ( None, 0 ) => Ok( right ),
+            ( _ , _ ) => {
+                let trailers = match lst.len() { 0 => None, _ => Some( Box::new( lst ) ) };
+                Ok(Box::new(AbstractSyntaxNodes::AtomExpr(start_pos, self.current_position(), await_symbol, right, trailers.to_owned())))
+            }
+        }
     }
 
+    // Rule: atom_expr [ '**' factor ]
     fn parse_power( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
