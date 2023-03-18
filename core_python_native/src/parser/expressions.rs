@@ -49,6 +49,7 @@ trait Expressions {
 
 impl Expressions for PythonCoreParser {
 
+    // Rule: Name | Number | String+ | ... | False | None | True | '(' [ yield_Expr | testlist_comp ] ')' | '[' subscript_list ']' | '{' dictionary or set '}'
     fn parse_atom( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         let start_pos = self.symbol_position();
         match &*self.symbol.clone() {
@@ -201,6 +202,7 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule: [ await? ] atom [ trailer* ]
     fn parse_atom_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
