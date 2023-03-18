@@ -270,7 +270,33 @@ impl Expressions for PythonCoreParser {
     }
 
     fn parse_factor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        match &*self.symbol {
+            Ok(s) => {
+                match &**s {
+                    Symbols::PyPlus( .. ) => {
+                        let symbol = (*s).clone();
+                        let _ = self.advance();
+                        let right_node = self.parse_factor()?;
+                        Ok( Box::new(AbstractSyntaxNodes::UnaryPlus(start_pos, self.current_position(), symbol.to_owned(), right_node)) )
+                    },
+                    Symbols::PyMinus( .. ) => {
+                        let symbol = (*s).clone();
+                        let _ = self.advance();
+                        let right_node = self.parse_factor()?;
+                        Ok( Box::new(AbstractSyntaxNodes::UnaryMinus(start_pos, self.current_position(), symbol.to_owned(), right_node)) )
+                    },
+                    Symbols::PyBitwiseInvert( .. ) => {
+                        let symbol = (*s).clone();
+                        let _ = self.advance();
+                        let right_node = self.parse_factor()?;
+                        Ok( Box::new(AbstractSyntaxNodes::BitwiseInvert(start_pos, self.current_position(), symbol.to_owned(), right_node)) )
+                    },
+                    _ => Ok ( self. parse_power()? )
+                }
+            },
+            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() )  )
+        }
     }
 
     fn parse_term( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
