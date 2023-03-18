@@ -226,9 +226,9 @@ impl Expressions for PythonCoreParser {
         while   match *self.symbol.clone() {
                     Ok(s) => {
                         match *s {
-                            Symbols::PyLeftParen(..) |
-                            Symbols::PyLeftBracket(..) |
-                            Symbols::PyDot(..) => {
+                            Symbols::PyLeftParen( .. ) |
+                            Symbols::PyLeftBracket( .. ) |
+                            Symbols::PyDot( .. ) => {
                                 let trailer = self.parse_trailer()?;
                                 lst.push( trailer.to_owned() );
                                 true
@@ -251,7 +251,22 @@ impl Expressions for PythonCoreParser {
 
     // Rule: atom_expr [ '**' factor ]
     fn parse_power( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let left_node = self.parse_atom_expr()?;
+        match &*self.symbol.clone() {
+            Ok(s) => {
+                match **s {
+                    Symbols::PyPower( .. ) => {
+                        let symbol = (**s).clone();
+                        let _ = self.advance();
+                        let right_node = self.parse_factor()?;
+                        Ok( Box::new(AbstractSyntaxNodes::Power( start_pos, self.current_position() , left_node, s.to_owned(), right_node)) )
+                    },
+                    _ => Ok( left_node )
+                }
+            },
+            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
     }
 
     fn parse_factor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
