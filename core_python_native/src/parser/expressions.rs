@@ -102,10 +102,10 @@ impl Expressions for PythonCoreParser {
                                     Symbols::PyRightParen(..) => {},
                                     _ => {
                                         right = Some( self.parse_testlist_comp()? );
-                                    }
+                                    },
                                 }
                             },
-                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
                         }
 
                         match &*self.symbol.clone() {
@@ -116,10 +116,10 @@ impl Expressions for PythonCoreParser {
                                         self.advance();
                                         Ok( Box::new(AbstractSyntaxNodes::Tuple( start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned() )) )
                                     },
-                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting ')' in Tuple!", self.symbol_position() ).to_string() ) )
                                 }
                             },
-                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
                         }
                     },
                     Symbols::PyLeftBracket( _ , _  ) => {
@@ -134,7 +134,7 @@ impl Expressions for PythonCoreParser {
                                     }
                                 }
                             },
-                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
                         }
 
                         match &*self.symbol.clone() {
@@ -145,10 +145,10 @@ impl Expressions for PythonCoreParser {
                                         self.advance();
                                         Ok( Box::new(AbstractSyntaxNodes::List(start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned())) )
                                     },
-                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() )  )
+                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting ']' in List!", self.symbol_position() ).to_string() )  )
                                 }
                             },
-                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ))
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ))
                         }
                     },
                     Symbols::PyLeftCurly( _ , _  ) => {
@@ -187,17 +187,17 @@ impl Expressions for PythonCoreParser {
                                             None => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
                                         }
                                     },
-                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting '}}' in dictionary or set!", self.symbol_position() ).to_string() ) )
                                 }
                             },
-                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
                         }
 
                     },
-                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
                 }
             },
-            _ =>    Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+            _ =>    Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
         }
     }
 
