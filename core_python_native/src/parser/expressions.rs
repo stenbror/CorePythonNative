@@ -19,7 +19,7 @@ trait Expressions {
     fn ParseNotTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseAndTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseOrTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseLambda( &mut self, isCond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn ParseLambda( &mut self, is_cond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseTestNoCond( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseNamedExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
@@ -108,7 +108,7 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseLambda( &mut self, isCond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn ParseLambda( &mut self, is_cond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 

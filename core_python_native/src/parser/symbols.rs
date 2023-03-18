@@ -60,7 +60,7 @@ pub enum Symbols
     PyDot               ( u32, u32 ),
     PyPlusAssign        ( u32, u32 ),
     PyPlus              ( u32, u32 ),
-    PuMinusAssign       ( u32, u32 ),
+    PyMinusAssign       ( u32, u32 ),
     PyArrow             ( u32, u32 ),
     PyMinus             ( u32, u32 ),
     PyModuloAssign      ( u32, u32 ),
