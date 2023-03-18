@@ -300,7 +300,7 @@ impl Expressions for PythonCoreParser {
         }
     }
 
-    // Rule: factor [ ( '*'  | '/' | '//' | '%' | '@' ) factor ]
+    // Rule: factor ( ( '*'  | '/' | '//' | '%' | '@' ) factor )*
     fn parse_term( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         let start_pos = self.symbol_position();
         let mut left_node = self.parse_factor()?;
@@ -347,8 +347,33 @@ impl Expressions for PythonCoreParser {
         Ok(left_node)
     }
 
+    // Rule:  term ( ( ( '+'  | '-' ) term )*
     fn parse_arith_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut left_node = self.parse_term()?;
+        while   match &*self.symbol {
+                    Ok(symbol_x) => {
+                        let symbol = (*symbol_x).clone();
+                        match &*symbol {
+                            Symbols::PyPlus( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_term()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Plus(start_pos, self.current_position(), left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyMinus( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_term()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Minus(start_pos, self.current_position(), left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            _ => false
+                        }
+                    },
+                    _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                } {};
+
+        Ok( left_node )
     }
 
     fn parse_shift_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
