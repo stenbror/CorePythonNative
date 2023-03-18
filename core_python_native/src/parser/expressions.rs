@@ -5,8 +5,8 @@ use crate::parser::symbols::*;
 // Trait: Expression rules ////////////////////////////////////////////////////////////////////////////////////////////
 
 trait Expressions {
-    fn ParseAtom( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseAtomExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_atom( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_atom_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParsePower( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseFactor( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseTerm( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
@@ -24,7 +24,7 @@ trait Expressions {
     fn ParseTestNoCond( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseTest( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseNamedExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseTestListComp( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_testlist_comp( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseTrailer( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseSubscriptList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseSubscript( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
@@ -37,7 +37,7 @@ trait Expressions {
     fn ParseCompIf( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseVarArgsList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseVFPDef( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
-    fn ParseYieldExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
+    fn parse_yield_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseTestListStarExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseArgList( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
     fn ParseArgument( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>>;
@@ -49,26 +49,26 @@ trait Expressions {
 
 impl Expressions for PythonCoreParser {
 
-    fn ParseAtom( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_atom( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         let start_pos = self.symbol_position();
         match &*self.symbol.clone() {
             Ok( s ) => {
                 let symbol1 = s.clone();
                 self.advance();
                 match &*symbol1 {
-                    Symbols::PyEllipsis( _ , _  ) =>
+                    Symbols::PyEllipsis( ..) =>
                         Ok( Box::new ( AbstractSyntaxNodes::Ellipsis( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
-                    Symbols::PyFalse( _ , _  ) =>
+                    Symbols::PyFalse( .. ) =>
                         Ok( Box::new ( AbstractSyntaxNodes::False( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
-                    Symbols::PyNone( _ , _  ) =>
+                    Symbols::PyNone( .. ) =>
                         Ok( Box::new ( AbstractSyntaxNodes::None( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
-                    Symbols::PyTrue( _ , _  ) =>
+                    Symbols::PyTrue( .. ) =>
                         Ok( Box::new ( AbstractSyntaxNodes::True( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
-                    Symbols::PyName( _ , _ , _  ) =>
+                    Symbols::PyName( .. ) =>
                         Ok( Box::new ( AbstractSyntaxNodes::Name( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
-                    Symbols::PyNumber( _ , _ , _  ) =>
+                    Symbols::PyNumber( ..  ) =>
                         Ok( Box::new ( AbstractSyntaxNodes::Number( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
-                    Symbols::PyString( _ , _ , _  ) => {
+                    Symbols::PyString( .. ) => {
                         let mut lst: Vec<Box<Symbols>> = Vec::new();
                         lst.push( symbol1.to_owned() );
 
@@ -90,7 +90,38 @@ impl Expressions for PythonCoreParser {
                         lst.reverse();
                         Ok( Box::new( AbstractSyntaxNodes::String( start_pos, self.symbol_position() - 1, Box::new( lst.to_owned() ) ) ) )
                     },
-                    // Symbols::PyLeftParen( _ , _  ) => (),
+                    Symbols::PyLeftParen( _ , _  ) => {
+                        let mut right : Option<Box<AbstractSyntaxNodes>> = None;
+
+                        match &*self.symbol.clone() {
+                            Ok(s) => {
+                                match **s {
+                                    Symbols::PyYield(..) => {
+                                        right = Some(self.parse_yield_expr()?);
+                                    },
+                                    Symbols::PyRightParen(..) => {},
+                                    _ => {
+                                        right = Some(self.parse_testlist_comp()?);
+                                    }
+                                }
+                            },
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                        }
+
+                        match &*self.symbol.clone() {
+                            Ok(s2) => {
+                                match **s2 {
+                                    Symbols::PyRightParen( .. ) => {
+                                        let symbol2 = (*s2).clone();
+                                        self.advance();
+                                        Ok( Box::new(AbstractSyntaxNodes::Tuple( start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned() )) )
+                                    },
+                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                                }
+                            },
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
+                        }
+                    },
                     // Symbols::PyLeftBracket( _ , _  ) => (),
                     // Symbols::PyLeftCurly( _ , _  ) => (),
                     _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
@@ -100,7 +131,7 @@ impl Expressions for PythonCoreParser {
         }
     }
 
-    fn ParseAtomExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_atom_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
@@ -172,7 +203,7 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseTestListComp( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_testlist_comp( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
@@ -224,7 +255,7 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
-    fn ParseYieldExpr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
+    fn parse_yield_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
