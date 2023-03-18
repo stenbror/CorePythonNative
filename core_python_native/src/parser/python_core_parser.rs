@@ -3,12 +3,15 @@ use crate::parser::symbols::*;
 
 pub struct PythonCoreParser {
     pub(crate) symbol: Box<Result<Box<Symbols>, Box<String>>>
+
 }
 
 
 pub trait PythonParser {
     fn new() -> Self;
-    fn advance(&mut self) -> ();
+    fn advance( &mut self ) -> ();
+    fn symbol_position( &mut self ) -> u32;
+    fn current_position( &mut self) -> u32;
 }
 
 
@@ -22,5 +25,13 @@ impl PythonParser for PythonCoreParser {
 
     fn advance(&mut self) -> () {
 
+    }
+
+    fn symbol_position( &mut self ) -> u32 {
+        0
+    }
+
+    fn current_position( &mut self) -> u32 {
+        0
     }
 }
