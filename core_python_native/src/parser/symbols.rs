@@ -12,6 +12,7 @@ pub enum Symbols
     PyAsync             ( u32, u32 ),
     PyAwait             ( u32, u32 ),
     PyBreak             ( u32, u32 ),
+    PyClass             ( u32, u32 ),
     PyContinue          ( u32, u32 ),
     PyDef               ( u32, u32 ),
     PyDel               ( u32, u32 ),
