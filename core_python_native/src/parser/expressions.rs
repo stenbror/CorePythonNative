@@ -706,8 +706,18 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule: or_test | lambda
     fn parse_test_no_cond( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        match &*self.symbol {
+            Ok(symbol_x) => {
+                let symbol = (*symbol_x).clone();
+                match &*symbol {
+                    Symbols::PyLambda( .. ) => self.parse_lambda(false),
+                    _ => self.parse_or_test()
+                }
+            },
+            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
     }
 
     fn parse_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
