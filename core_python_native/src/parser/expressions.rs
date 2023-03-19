@@ -115,7 +115,7 @@ impl Expressions for PythonCoreParser {
                                     Symbols::PyRightParen( .. ) => {
                                         let symbol2 = (*s2).clone();
                                         self.advance();
-                                        Ok( Box::new(AbstractSyntaxNodes::Tuple( start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned() )) )
+                                        Ok( Box::new(AbstractSyntaxNodes::Tuple( start_pos, self.current_position() - 1, symbol1.to_owned(), right, symbol2.to_owned() )) )
                                     },
                                     _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting ')' in Tuple!", self.symbol_position() ).to_string() ) )
                                 }
@@ -144,7 +144,7 @@ impl Expressions for PythonCoreParser {
                                     Symbols::PyRightBracket( .. ) => {
                                         let symbol2 = (*s2).clone();
                                         self.advance();
-                                        Ok( Box::new(AbstractSyntaxNodes::List(start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned())) )
+                                        Ok( Box::new(AbstractSyntaxNodes::List(start_pos, self.current_position() - 1, symbol1.to_owned(), right, symbol2.to_owned())) )
                                     },
                                     _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting ']' in List!", self.symbol_position() ).to_string() )  )
                                 }
@@ -177,12 +177,12 @@ impl Expressions for PythonCoreParser {
                                             Some( ref a ) => {
                                                 match &**a {
                                                     AbstractSyntaxNodes::DictionaryContainer( .. ) => {
-                                                        Ok( Box::new(AbstractSyntaxNodes::Dictionary(start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned())))
+                                                        Ok( Box::new(AbstractSyntaxNodes::Dictionary(start_pos, self.current_position() - 1, symbol1.to_owned(), right, symbol2.to_owned())))
                                                     },
                                                     AbstractSyntaxNodes::SetContainer( .. ) => {
-                                                        Ok( Box::new(AbstractSyntaxNodes::Set(start_pos, self.current_position(), symbol1.to_owned(), right, symbol2.to_owned())))
+                                                        Ok( Box::new(AbstractSyntaxNodes::Set(start_pos, self.current_position() - 1, symbol1.to_owned(), right, symbol2.to_owned())))
                                                     },
-                                                    _ => Ok( Box::new(AbstractSyntaxNodes::Dictionary(start_pos, self.current_position(), symbol1.to_owned(), None, symbol2.to_owned())))
+                                                    _ => Ok( Box::new(AbstractSyntaxNodes::Dictionary(start_pos, self.current_position() - 1, symbol1.to_owned(), None, symbol2.to_owned())))
                                                 }
                                             },
                                             None => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting valid literal!", self.symbol_position() ).to_string() ) )
@@ -244,7 +244,7 @@ impl Expressions for PythonCoreParser {
             ( None, 0 ) => Ok( right ),
             ( _ , _ ) => {
                 let trailers = match lst.len() { 0 => None, _ => Some( Box::new( lst ) ) };
-                Ok(Box::new(AbstractSyntaxNodes::AtomExpr(start_pos, self.current_position(), await_symbol, right, trailers.to_owned())))
+                Ok(Box::new(AbstractSyntaxNodes::AtomExpr(start_pos, self.current_position() - 1, await_symbol, right, trailers.to_owned())))
             }
         }
     }
@@ -260,7 +260,7 @@ impl Expressions for PythonCoreParser {
                         let symbol = (**s).clone();
                         let _ = self.advance();
                         let right_node = self.parse_factor()?;
-                        Ok( Box::new(AbstractSyntaxNodes::Power( start_pos, self.current_position() , left_node, s.to_owned(), right_node)) )
+                        Ok( Box::new(AbstractSyntaxNodes::Power( start_pos, self.current_position() - 1, left_node, s.to_owned(), right_node)) )
                     },
                     _ => Ok( left_node )
                 }
@@ -279,19 +279,19 @@ impl Expressions for PythonCoreParser {
                         let symbol = (*s).clone();
                         let _ = self.advance();
                         let right_node = self.parse_factor()?;
-                        Ok( Box::new(AbstractSyntaxNodes::UnaryPlus(start_pos, self.current_position(), symbol.to_owned(), right_node)) )
+                        Ok( Box::new(AbstractSyntaxNodes::UnaryPlus(start_pos, self.current_position() - 1, symbol.to_owned(), right_node)) )
                     },
                     Symbols::PyMinus( .. ) => {
                         let symbol = (*s).clone();
                         let _ = self.advance();
                         let right_node = self.parse_factor()?;
-                        Ok( Box::new(AbstractSyntaxNodes::UnaryMinus(start_pos, self.current_position(), symbol.to_owned(), right_node)) )
+                        Ok( Box::new(AbstractSyntaxNodes::UnaryMinus(start_pos, self.current_position() - 1, symbol.to_owned(), right_node)) )
                     },
                     Symbols::PyBitwiseInvert( .. ) => {
                         let symbol = (*s).clone();
                         let _ = self.advance();
                         let right_node = self.parse_factor()?;
-                        Ok( Box::new(AbstractSyntaxNodes::BitwiseInvert(start_pos, self.current_position(), symbol.to_owned(), right_node)) )
+                        Ok( Box::new(AbstractSyntaxNodes::BitwiseInvert(start_pos, self.current_position() - 1, symbol.to_owned(), right_node)) )
                     },
                     _ => Ok ( self. parse_power()? )
                 }
@@ -311,31 +311,31 @@ impl Expressions for PythonCoreParser {
                             Symbols::PyMul( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_factor()?;
-                                left_node = Box::new(AbstractSyntaxNodes::Mul(start_pos, self.current_position(),left_node, symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::Mul(start_pos, self.current_position() - 1,left_node, symbol.to_owned(), right_node));
                                 true
                             },
                             Symbols::PyDiv( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_factor()?;
-                                left_node = Box::new(AbstractSyntaxNodes::Div(start_pos, self.current_position(),left_node, symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::Div(start_pos, self.current_position() - 1,left_node, symbol.to_owned(), right_node));
                                 true
                             },
                             Symbols::PyFloorDiv( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_factor()?;
-                                left_node = Box::new(AbstractSyntaxNodes::FloorDiv(start_pos, self.current_position(),left_node, symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::FloorDiv(start_pos, self.current_position() - 1,left_node, symbol.to_owned(), right_node));
                                 true
                             },
                             Symbols::PyModulo( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_factor()?;
-                                left_node = Box::new(AbstractSyntaxNodes::Modulo(start_pos, self.current_position(), left_node, symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::Modulo(start_pos, self.current_position() - 1, left_node, symbol.to_owned(), right_node));
                                 true
                             },
                             Symbols::PyMatrices( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_factor()?;
-                                left_node = Box::new(AbstractSyntaxNodes::Matrices(start_pos, self.current_position(),left_node, symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::Matrices(start_pos, self.current_position() - 1,left_node, symbol.to_owned(), right_node));
                                 true
                             },
                             _ => false
@@ -358,13 +358,13 @@ impl Expressions for PythonCoreParser {
                             Symbols::PyPlus( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_term()?;
-                                left_node = Box::new(AbstractSyntaxNodes::Plus(start_pos, self.current_position(), left_node,symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::Plus(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
                                 true
                             },
                             Symbols::PyMinus( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_term()?;
-                                left_node = Box::new(AbstractSyntaxNodes::Minus(start_pos, self.current_position(), left_node,symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::Minus(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
                                 true
                             },
                             _ => false
@@ -387,13 +387,13 @@ impl Expressions for PythonCoreParser {
                             Symbols::PyShiftLeft( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_arith_expr()?;
-                                left_node = Box::new(AbstractSyntaxNodes::ShiftLeft(start_pos, self.current_position(), left_node, symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::ShiftLeft(start_pos, self.current_position() - 1, left_node, symbol.to_owned(), right_node));
                                 true
                             },
                             Symbols::PyShiftRight( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_arith_expr()?;
-                                left_node = Box::new(AbstractSyntaxNodes::ShiftRight(start_pos, self.current_position(), left_node,symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::ShiftRight(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
                                 true
                             },
                             _ => false
@@ -416,7 +416,7 @@ impl Expressions for PythonCoreParser {
                     Symbols::PyBitwiseAnd( .. ) => {
                         let _ = self.advance();
                         let right_node = self.parse_shift_expr()?;
-                        left_node = Box::new(AbstractSyntaxNodes::BitwiseAnd(start_pos, self.current_position(), left_node, symbol.to_owned(), right_node));
+                        left_node = Box::new(AbstractSyntaxNodes::BitwiseAnd(start_pos, self.current_position() - 1, left_node, symbol.to_owned(), right_node));
                         true
                     },
                     _ => false
@@ -428,7 +428,7 @@ impl Expressions for PythonCoreParser {
         Ok( left_node )
     }
 
-    // Rule: and_expr ( '|' and_expr )*
+    // Rule: and_expr ( '^' and_expr )*
     fn parse_xor_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         let start_pos = self.symbol_position();
         let mut left_node = self.parse_and_expr()?;
@@ -439,7 +439,7 @@ impl Expressions for PythonCoreParser {
                             Symbols::PyBitwiseXor( .. ) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_and_expr()?;
-                                left_node = Box::new(AbstractSyntaxNodes::BitwiseXor(start_pos, self.current_position(), left_node,symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::BitwiseXor(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
                                 true
                             },
                             _ => false
@@ -451,8 +451,27 @@ impl Expressions for PythonCoreParser {
         Ok( left_node )
     }
 
+    // Rule: xor_expr ( '|' xor_expr )*
     fn parse_or_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut left_node = self.parse_xor_expr()?;
+        while   match &*self.symbol {
+                    Ok(symbol_x) => {
+                        let symbol = (*symbol_x).clone();
+                        match &*symbol {
+                            Symbols::PyBitwiseOr( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_xor_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::BitwiseOr(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            _ => false
+                        }
+                    },
+                    _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                } {};
+
+        Ok( left_node )
     }
 
     fn parse_star_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
