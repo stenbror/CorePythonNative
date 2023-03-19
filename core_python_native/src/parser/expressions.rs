@@ -720,8 +720,47 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule: ( or_test [ 'if' or_test 'else' test ] ) | lambda
     fn parse_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        match &*self.symbol {
+            Ok(s) => {
+                match (**s).clone() {
+                    Symbols::PyLambda( .. ) => self.parse_lambda(true),
+                    _ => {
+                        let left = self.parse_or_test()?;
+                        match &*self.symbol {
+                            Ok(s2) => {
+                                let symbol1 = (*s2).clone();
+                                match &*symbol1 {
+                                    Symbols::PyIf( .. ) => {
+                                        let _ = self.advance();
+                                        let right = self.parse_or_test()?;
+                                        match &*self.symbol {
+                                            Ok(s3) => {
+                                                let symbol2 = (*s3).clone();
+                                                match &*symbol2 {
+                                                    Symbols::PyElse( .. ) => {
+                                                        let _ = self.advance();
+                                                        let next = self.parse_test()?;
+                                                        Ok(Box::new(AbstractSyntaxNodes::Test(start_pos, self.current_position() - 1, left, symbol1, right, symbol2, next)))
+                                                    },
+                                                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting 'else' in test expression!", self.symbol_position() ).to_string() ) )
+                                                }
+                                            },
+                                            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                                        }
+                                    },
+                                    _ => Ok(left)
+                                }
+                            },
+                            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                        }
+                    }
+                }
+            },
+            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
     }
 
     fn parse_named_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
