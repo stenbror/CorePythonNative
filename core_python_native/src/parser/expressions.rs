@@ -55,7 +55,7 @@ impl Expressions for PythonCoreParser {
         match &*self.symbol.clone() {
             Ok( s ) => {
                 let symbol1 = s.clone();
-                self.advance();
+                let _ = self.advance();
                 match &*symbol1 {
                     Symbols::PyEllipsis( ..) =>
                         Ok( Box::new ( AbstractSyntaxNodes::Ellipsis( start_pos, self.symbol_position() - 1, symbol1.to_owned() ) ) ),
@@ -78,7 +78,7 @@ impl Expressions for PythonCoreParser {
                                         let symbol2 = (*s).clone();
                                         match *symbol2 {
                                             Symbols::PyString( _ , _ , _ ) => {
-                                                self.advance();
+                                                let _ = self.advance();
                                                 lst.push( symbol2.to_owned() );
                                                 true
                                             },
@@ -114,7 +114,7 @@ impl Expressions for PythonCoreParser {
                                 match **s2 {
                                     Symbols::PyRightParen( .. ) => {
                                         let symbol2 = (*s2).clone();
-                                        self.advance();
+                                        let _ = self.advance();
                                         Ok( Box::new(AbstractSyntaxNodes::Tuple( start_pos, self.current_position() - 1, symbol1.to_owned(), right, symbol2.to_owned() )) )
                                     },
                                     _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting ')' in Tuple!", self.symbol_position() ).to_string() ) )
@@ -143,7 +143,7 @@ impl Expressions for PythonCoreParser {
                                 match **s2 {
                                     Symbols::PyRightBracket( .. ) => {
                                         let symbol2 = (*s2).clone();
-                                        self.advance();
+                                        let _ = self.advance();
                                         Ok( Box::new(AbstractSyntaxNodes::List(start_pos, self.current_position() - 1, symbol1.to_owned(), right, symbol2.to_owned())) )
                                     },
                                     _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting ']' in List!", self.symbol_position() ).to_string() )  )
@@ -172,7 +172,7 @@ impl Expressions for PythonCoreParser {
                                 match **s2 {
                                     Symbols::PyRightCurly(..) => {
                                         let symbol2 = (*s2).clone();
-                                        self.advance();
+                                        let _ = self.advance();
                                         match right {
                                             Some( ref a ) => {
                                                 match &**a {
@@ -743,7 +743,7 @@ impl Expressions for PythonCoreParser {
                                                     Symbols::PyElse( .. ) => {
                                                         let _ = self.advance();
                                                         let next = self.parse_test()?;
-                                                        Ok(Box::new(AbstractSyntaxNodes::Test(start_pos, self.current_position() - 1, left, symbol1, right, symbol2, next)))
+                                                        Ok( Box::new(AbstractSyntaxNodes::Test(start_pos, self.current_position() - 1, left, symbol1, right, symbol2, next)) )
                                                     },
                                                     _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting 'else' in test expression!", self.symbol_position() ).to_string() ) )
                                                 }
@@ -763,8 +763,24 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule: test [ ':=' test ]
     fn parse_named_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let left = self.parse_test()?;
+        match &*self.symbol {
+            Ok(s) => {
+                let symbol = (*s).clone();
+                match &*symbol {
+                    Symbols::PyColonAssign( .. ) => {
+                        let _ = self.advance();
+                        let right = self.parse_test()?;
+                        Ok( Box::new(AbstractSyntaxNodes::NamedExpr(start_pos, self.current_position() - 1, left,  symbol, right)) )
+                    },
+                    _ => Ok( left )
+                }
+            },
+            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
     }
 
     fn parse_testlist_comp( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
