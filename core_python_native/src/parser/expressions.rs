@@ -474,8 +474,23 @@ impl Expressions for PythonCoreParser {
         Ok( left_node )
     }
 
+    // Rule: '*' or_expr
     fn parse_star_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        match &*self.symbol {
+            Ok(s) => {
+                match &**s {
+                    Symbols::PyMul(..) => {
+                        let symbol = (*s).clone();
+                        let _ = self.advance();
+                        let right_node = self.parse_or_expr()?;
+                        Ok(Box::new(AbstractSyntaxNodes::StarExpr(start_pos, self.current_position() - 1, symbol.to_owned(), right_node)))
+                    },
+                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting '*' in star expression!", self.symbol_position() ).to_string() ) )
+                }
+            },
+            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
     }
 
     fn parse_comparison( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
