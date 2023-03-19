@@ -627,7 +627,7 @@ impl Expressions for PythonCoreParser {
                             Symbols::PyAnd(..) => {
                                 let _ = self.advance();
                                 let right_node = self.parse_not_test()?;
-                                left_node = Box::new(AbstractSyntaxNodes::AndTest(start_pos, self.current_position() - 1, left_node.clone(),symbol.to_owned(), right_node));
+                                left_node = Box::new(AbstractSyntaxNodes::AndTest(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
                                 true
                             },
                             _ => false
@@ -639,12 +639,71 @@ impl Expressions for PythonCoreParser {
         Ok( left_node )
     }
 
+    // Rule: and_test 'or' and_test
     fn parse_or_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut left_node = self.parse_and_test()?;
+        while   match &*self.symbol {
+                    Ok(symbol_x) => {
+                        let symbol = (*symbol_x).clone();
+                        match &*symbol {
+                            Symbols::PyOr( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_and_test()?;
+                                left_node = Box::new(AbstractSyntaxNodes::OrTest(start_pos, self.current_position() - 1, left_node, symbol.to_owned(), right_node));
+                                true
+                            },
+                            _ => false
+                        }
+                    },
+                    _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                } {};
+
+        Ok( left_node )
     }
 
+    // Rule: 'lambda' [ var_Args_list ] ':' ( test | test_no_cond )
     fn parse_lambda( &mut self, is_cond: bool) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        match &*self.symbol {
+            Ok(s1) => {
+                let symbol1 = (*s1).clone();
+                let _ = self.advance();
+                let mut left : Option<Box<AbstractSyntaxNodes>> = None;
+                match &*self.symbol {
+                    Ok(s2) => {
+                        match &**s2 {
+                            Symbols::PyColon( .. ) => { },
+                            _ => left = Some( self.parse_var_argslist()? )
+                        }
+                    },
+                    _=> return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                }
+                match &*self.symbol {
+                    Ok(s2) => {
+                        match &**s2 {
+                            Symbols::PyColon( .. ) => {
+                                let symbol2 = (*s2).clone();
+                                let _ = self.advance();
+                                match is_cond {
+                                    true => {
+                                        let right = self.parse_test()?;
+                                        Ok( Box::new(AbstractSyntaxNodes::Lambda(start_pos, self.current_position() - 1, symbol1.to_owned(), left, symbol2.to_owned(), right )) )
+                                    },
+                                    _ => {
+                                        let right = self.parse_or_test()?;
+                                        Ok( Box::new(AbstractSyntaxNodes::Lambda(start_pos, self.current_position() - 1, symbol1.to_owned(), left, symbol2.to_owned(), right )) )
+                                    }
+                                }
+                            },
+                            _ => Err( Box::new( format!("SyntaxError: ( {} ) - Expecting ':' in lambda expression!", self.symbol_position() ).to_string() ) )
+                        }
+                    },
+                    _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                }
+            },
+            _=> Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
     }
 
     fn parse_test_no_cond( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
