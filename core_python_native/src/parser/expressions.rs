@@ -493,8 +493,108 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule: or_expr ( ( '<' | '<=' | '==' | '<>' | '!=' | '>' | '>=' | 'in' | 'is' 'not' | 'is' | 'not' 'in' ) or_expr )*
     fn parse_comparison( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut left_node = self.parse_or_expr()?;
+        while   match &*self.symbol {
+                    Ok(symbol_x) => {
+                        let symbol = (*symbol_x).clone();
+                        match &*symbol {
+                            Symbols::PyLess(..) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_or_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Less(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyLessEqual(..) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_or_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::LessEqual(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyEqual(..) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_or_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Equal(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyGreaterEqual(..) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_or_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::GreaterEqual(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyGreater(..) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_or_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::Greater(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyNotEqual(..) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_or_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::NotEqual(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyIn(..) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_or_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::In(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            Symbols::PyIs(..) => {
+                                let _ = self.advance();
+                                match &*self.symbol {
+                                    Ok(symbol_x) => {
+                                        let symbol2 = (*symbol_x).clone();
+                                        match &*symbol2 {
+                                            Symbols::PyNot(..) => {
+                                                let _ = self.advance();
+                                                let right_node = self.parse_or_expr()?;
+                                                left_node = Box::new(AbstractSyntaxNodes::IsNot(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), symbol2.to_owned(), right_node));
+                                            },
+                                            _ => {
+                                                let right_node = self.parse_or_expr()?;
+                                                left_node = Box::new(AbstractSyntaxNodes::Is(start_pos, self.current_position() - 1, left_node,symbol.to_owned(), right_node));
+                                            }
+                                        }
+                                    },
+                                    _ => {
+                                        return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                                    }
+                                }
+                                true
+                            },
+                            Symbols::PyNot(..) => {
+                                let _ = self.advance();
+                                match &*self.symbol {
+                                    Ok(symbol_x) => {
+                                        let symbol2 = (*symbol_x).clone();
+                                        match &*symbol2 {
+                                            Symbols::PyIn(..) => {
+                                                let _ = self.advance();
+                                                let right_node = self.parse_or_expr()?;
+                                                left_node = Box::new(AbstractSyntaxNodes::NotIn(start_pos, self.current_position() - 1, left_node, symbol.to_owned(), symbol2.to_owned(), right_node));
+                                            },
+                                            _ => {
+                                                return Err( Box::new( format!("SyntaxError: ( {} ) - Expecting in in not in expression!", self.symbol_position() ).to_string() ) )
+                                            }
+                                        }
+                                    },
+                                    _ => {
+                                        return Err(Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                                    }
+                                }
+                                true
+                            },
+                            _ => false
+                        }
+                    },
+                    _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                } {};
+
+        Ok( left_node )
     }
 
     fn parse_not_test( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
