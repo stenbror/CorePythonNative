@@ -424,11 +424,31 @@ impl Expressions for PythonCoreParser {
             },
             _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
         } {};
-        Ok(left_node)
+
+        Ok( left_node )
     }
 
+    // Rule: and_expr ( '|' and_expr )*
     fn parse_xor_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut left_node = self.parse_and_expr()?;
+        while   match &*self.symbol {
+                    Ok(symbol_x) => {
+                        let symbol = (*symbol_x).clone();
+                        match &*symbol {
+                            Symbols::PyBitwiseXor( .. ) => {
+                                let _ = self.advance();
+                                let right_node = self.parse_and_expr()?;
+                                left_node = Box::new(AbstractSyntaxNodes::BitwiseXor(start_pos, self.current_position(), left_node,symbol.to_owned(), right_node));
+                                true
+                            },
+                            _ => false
+                        }
+                    },
+                    _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                } {};
+
+        Ok( left_node )
     }
 
     fn parse_or_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
