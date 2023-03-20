@@ -220,7 +220,7 @@ impl Expressions for PythonCoreParser {
                                     _ => None
                                 };
 
-        let right = self.parse_atom_expr()?;
+        let right = self.parse_atom()?;
 
         let mut lst : Vec<Box<AbstractSyntaxNodes>> = Vec::new();
         while   match *self.symbol.clone() {
@@ -257,10 +257,10 @@ impl Expressions for PythonCoreParser {
             Ok(s) => {
                 match **s {
                     Symbols::PyPower( .. ) => {
-                        let symbol = (**s).clone();
+                        let symbol = (*s).clone();
                         let _ = self.advance();
                         let right_node = self.parse_factor()?;
-                        Ok( Box::new(AbstractSyntaxNodes::Power( start_pos, self.current_position() - 1, left_node, s.to_owned(), right_node)) )
+                        Ok( Box::new(AbstractSyntaxNodes::Power( start_pos, self.current_position() - 1, left_node, symbol.to_owned(), right_node)) )
                     },
                     _ => Ok( left_node )
                 }
@@ -783,8 +783,64 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule:  ( * expr | named_Expr ) ( comp_for | ( * expr | named_Expr  )* )
     fn parse_testlist_comp( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut nodes_list : Box<Vec<Box<AbstractSyntaxNodes>>> = Box::new(Vec::new());
+        let mut separators_list : Box<Vec<Box<Symbols>>> = Box::new(Vec::new());
+        match &*self.symbol {
+            Ok(s) => {
+                match &(**s) {
+                    Symbols::PyMul( .. ) => {
+                        nodes_list.push(self.parse_star_expr()?)
+                    },
+                    _ => nodes_list.push(self.parse_named_expr()?)
+                }
+            },
+            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
+        match &*self.symbol {
+            Ok(s2) => {
+                match &(**s2) {
+                    Symbols::PyFor( .. ) |
+                    Symbols::PyAsync( .. ) => {
+                        nodes_list.push( self.parse_comp_for()? );
+                    },
+                    Symbols::PyComma( .. ) => {
+                        while match &*self.symbol {
+                            Ok(s3) => {
+                                match &(**s3) {
+                                    Symbols::PyComma( .. ) => {
+                                        separators_list.push((*s3).clone() );
+                                        let _ = self.advance();
+
+                                        match &*self.symbol {
+                                            Ok( s4) => {
+                                                match &(**s4) {
+                                                    Symbols::PyMul( .. ) => {
+                                                        nodes_list.push(self.parse_star_expr()?)
+                                                    },
+                                                    _ => nodes_list.push(self.parse_named_expr()?)
+                                                }
+                                            },
+                                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                                        }
+                                        true
+                                    },
+                                    _ => false
+                                }
+                            },
+                            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                        } {};
+                    },
+                    _ => {}
+                }
+            },
+            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
+        nodes_list.reverse();
+        separators_list.reverse();
+        Ok( Box::new(AbstractSyntaxNodes::TestList(start_pos, self.current_position() - 1, nodes_list, separators_list)) )
     }
 
     fn parse_trailer( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
