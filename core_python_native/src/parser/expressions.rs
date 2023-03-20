@@ -1029,8 +1029,45 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
+    // Rule:
     fn parse_arglist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut nodes_list : Vec<Box<AbstractSyntaxNodes>> = Vec::new();
+        let mut separators_list : Vec<Box<Symbols>> = Vec::new();
+        nodes_list.push(self.parse_argument()?);
+        while
+            match &*self.symbol {
+                Ok(s) => {
+                    match &**s {
+                        Symbols::PyComma( .. ) => {
+                            let symbol1 = (*s).clone();
+                            separators_list.push( symbol1 );
+                            let _ = self.advance();
+                            match &*self.symbol {
+                                Ok(s2) => {
+                                    match &(**s2) {
+                                        Symbols::PyRightParen( .. ) => false,
+                                        Symbols::PyComma( .. ) => return Err( Box::new( format!("SyntaxError: ( {} ) - Unexpected double  ',' in argument list!", self.symbol_position() ).to_string() ) ),
+                                        _ => {
+                                            nodes_list.push(self.parse_argument()?);
+                                            true
+                                        }
+                                    }
+                                },
+                                _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                            };
+                            true
+                        },
+                        _ => false
+                    }
+                },
+                _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+            } {};
+
+        nodes_list.reverse();
+        separators_list.reverse();
+
+        Ok(Box::new(AbstractSyntaxNodes::ArgumentList(start_pos, self.current_position() - 1, Box::new( nodes_list ), Box::new( separators_list ))))
     }
 
     fn parse_argument( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
