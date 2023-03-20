@@ -51,7 +51,7 @@ pub enum AbstractSyntaxNodes {
     VarArgsList             ( u32, u32, Option<(Box<Symbols>, Box<AbstractSyntaxNodes>)>, Option<(Box<Symbols>, Box<AbstractSyntaxNodes>)>, Box<[Box<AbstractSyntaxNodes>]>, Box<[Box<Symbols>]>  ),
     VFPDefAssign            ( u32, u32, Box<AbstractSyntaxNodes>, Box<Symbols>, Box<AbstractSyntaxNodes> ),
     TestList                ( u32, u32, Box<Vec<Box<AbstractSyntaxNodes>>>, Box<Vec<Box<Symbols>>> ),
-    ExprList                ( u32, u32, Box<[Box<AbstractSyntaxNodes>]>, Box<[Box<Symbols>]> ),
+    ExprList                ( u32, u32, Box<Vec<Box<AbstractSyntaxNodes>>>, Box<Vec<Box<Symbols>>> ),
     SubscriptList           ( u32, u32, Box<[Box<AbstractSyntaxNodes>]>, Box<[Box<Symbols>]> ),
     Subscript               ( u32, u32, Option<Box<AbstractSyntaxNodes>>, Option<Box<Symbols>>, Option<Box<AbstractSyntaxNodes>>, Option<Box<Symbols>>, Option<Box<AbstractSyntaxNodes>>  ),
     CompSyncFor             ( u32, u32, Box<Symbols>, Box<AbstractSyntaxNodes>, Box<Symbols>, Box<AbstractSyntaxNodes>, Box<AbstractSyntaxNodes> ),

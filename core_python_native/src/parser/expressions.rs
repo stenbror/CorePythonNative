@@ -903,8 +903,69 @@ impl Expressions for PythonCoreParser {
         }
     }
 
+    // Rule: ( '*' expr | expr ) ( ',' ( '*' expr | expr ) )* [ ',' ]
     fn parse_exprlist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut nodes_list : Vec<Box<AbstractSyntaxNodes>> = Vec::new();
+        let mut separators_list : Vec<Box<Symbols>> = Vec::new();
+        let mut first_element = Box::new( AbstractSyntaxNodes::Empty );
+        match &*self.symbol {
+            Ok(s) => {
+                match &(**s) {
+                    Symbols::PyMul( .. ) => {
+                        first_element = self.parse_star_expr()?;
+                        nodes_list.push(first_element.clone() )
+                    },
+                    _ => {
+                        first_element = self.parse_named_expr()?;
+                        nodes_list.push(first_element.clone() )
+                    }
+                }
+            },
+            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        };
+        while
+            match &*self.symbol {
+                Ok(s) => {
+                    match &**s {
+                        Symbols::PyComma(..) => {
+                            let symbol1 = (**s).clone();
+                            separators_list.push( Box::new(symbol1) );
+                            let _ = self.advance();
+                            match &*self.symbol {
+                                Ok(s2) => {
+                                    match &(**s2) {
+                                        Symbols::PyIn( .. ) => false,
+                                        Symbols::PyComma( .. ) => return Err( Box::new( format!("SyntaxError: ( {} ) - Unexpected double ',' in expr list!", self.symbol_position() ).to_string() ) ),
+                                        Symbols::PyMul( .. ) => {
+                                            nodes_list.push(self.parse_star_expr()?);
+                                            true
+                                        },
+                                        _ => {
+                                            nodes_list.push(self.parse_named_expr()?);
+                                            true
+                                        }
+                                    }
+                                },
+                                _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                            };
+                            true
+                        },
+                        _ => false
+                    }
+                },
+                _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+            } {};
+
+        nodes_list.reverse();
+        separators_list.reverse();
+
+        match ( nodes_list.len(), separators_list.len() ) {
+            ( 1, 0 ) => {
+                Ok( first_element )
+            },
+            _ => Ok( Box::new(AbstractSyntaxNodes::ExprList(start_pos, self.current_position() - 1, Box::new( nodes_list ), Box::new( separators_list))) )
+        }
     }
 
     fn parse_dictionary_or_set_maker( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
