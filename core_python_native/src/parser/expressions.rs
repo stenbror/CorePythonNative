@@ -847,8 +847,33 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::Empty))
     }
 
+    // Rule:  subscript ( ',' subscript )*
     fn parse_subscript_list( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut nodes_list : Vec<Box<AbstractSyntaxNodes>> = Vec::new();
+        let mut separators_list : Vec<Box<Symbols>> = Vec::new();
+        nodes_list.push( self.parse_subscript()? );
+        while
+            match &*self.symbol {
+                Ok(s) => {
+                    match &**s {
+                        Symbols::PyComma( .. ) => {
+                            let symbol1 = (*s).clone();
+                            separators_list.push( symbol1 );
+                            let _ = self.advance();
+                            nodes_list.push( self.parse_subscript()? );
+                            true
+                        },
+                        _ => false
+                    }
+                },
+                _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+            } {};
+
+        separators_list.reverse();
+        nodes_list.reverse();
+
+        Ok( Box::new(AbstractSyntaxNodes::SubscriptList(start_pos, self.current_position() - 1, Box::new( nodes_list ), Box::new( separators_list ))) )
     }
 
     fn parse_subscript( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
