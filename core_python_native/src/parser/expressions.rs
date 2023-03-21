@@ -1101,7 +1101,7 @@ impl Expressions for PythonCoreParser {
         }
     }
 
-    // Rule:
+    // Rule: (test|star_expr) (',' (test|star_expr))* [',']
     fn parse_arglist( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
         let start_pos = self.symbol_position();
         let mut nodes_list : Vec<Box<AbstractSyntaxNodes>> = Vec::new();
@@ -1142,8 +1142,55 @@ impl Expressions for PythonCoreParser {
         Ok(Box::new(AbstractSyntaxNodes::ArgumentList(start_pos, self.current_position() - 1, Box::new( nodes_list ), Box::new( separators_list ))))
     }
 
+    // Rule: ( test [comp_for] |
+    //             test ':=' test |
+    //             test '=' test |
+    //             '**' test |
+    //             '*' test )
     fn parse_argument( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        match &*self.symbol {
+            Ok(s) => {
+                match &**s {
+                    Symbols::PyMul( .. ) |
+                    Symbols::PyPower( .. ) => {
+                        let symbol1 = Some( (*s).clone());
+                        let _ = self.advance();
+                        let right_node = self.parse_test()?;
+
+                        Ok( Box::new(AbstractSyntaxNodes::Argument(start_pos, self.current_position() - 1, None, symbol1, right_node)) )
+                    },
+                    _ => {
+                        let left_node = Some( self.parse_test()? );
+                        match &*self.symbol {
+                            Ok(s2) => {
+                                match &**s2 {
+                                    Symbols::PyFor( .. ) |
+                                    Symbols::PyAsync( .. ) => {
+                                        let right_node = self.parse_comp_for()?;
+
+                                        Ok( Box::new(AbstractSyntaxNodes::Argument( start_pos, self.current_position() - 1, left_node, None, right_node)) )
+                                    },
+                                    Symbols::PyColonAssign( .. ) |
+                                    Symbols::PyAssign( .. ) => {
+                                        let symbol1 = Some((*s2).clone());
+                                        let _ = self.advance();
+                                        let right_node = self.parse_test()?;
+
+                                        Ok( Box::new(AbstractSyntaxNodes::Argument(start_pos, self.current_position() - 1, left_node, symbol1, right_node)) )
+                                    },
+                                    _ => {
+                                        Ok( Box::new(AbstractSyntaxNodes::Argument(start_pos, self.current_position() - 1, None, None, left_node.unwrap() )) )
+                                    }
+                                }
+                            },
+                            _ => Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                        }
+                    }
+                }
+            },
+            _=> Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        }
     }
 }
 
