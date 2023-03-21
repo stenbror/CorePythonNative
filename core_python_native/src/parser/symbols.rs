@@ -89,7 +89,7 @@ pub enum Symbols
     PyNumber            ( u32, u32, Box<String> ),
     PyString            ( u32, u32, Box<String> ),
     TypeComment         ( u32, u32, Box<String> ),
-    Newlien             ( u32, u32 ),
+    Newline             ( u32, u32 ),
     Indent,
     Dedent,
     EOF                 ( u32 )

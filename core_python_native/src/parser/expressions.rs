@@ -898,7 +898,7 @@ impl Expressions for PythonCoreParser {
                             match &*self.symbol {
                                 Ok(s2) => {
                                     match &(**s2) {
-                                        Symbols::Newlien( .. ) |
+                                        Symbols::Newline( .. ) |
                                         Symbols::PySemicolon( .. ) |
                                         Symbols::EOF( .. ) => false,
                                         Symbols::PyComma( .. ) => return Err( Box::new( format!("SyntaxError: ( {} ) - Unexpected double ',' in testlist!", self.symbol_position() ).to_string() ) ),
@@ -1026,7 +1026,79 @@ impl Expressions for PythonCoreParser {
     }
 
     fn parse_testlist_star_expr( &mut self ) -> Result<Box<AbstractSyntaxNodes>, Box<String>> {
-        Ok(Box::new(AbstractSyntaxNodes::Empty))
+        let start_pos = self.symbol_position();
+        let mut nodes_list : Vec<Box<AbstractSyntaxNodes>> = Vec::new();
+        let mut separators_list : Vec<Box<Symbols>> = Vec::new();
+        match &*self.symbol {
+            Ok(s) => {
+                match &(**s) {
+                    Symbols::PyMul(..) => {
+                        nodes_list.push(self.parse_star_expr()?)
+                    },
+                    _ => nodes_list.push(self.parse_test()?)
+                }
+            },
+            _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+        };
+        while
+            match &*self.symbol {
+                Ok(s) => {
+                    match &**s {
+                        Symbols::PyComma(..) => {
+                            let symbol1 = (*s).clone();
+                            separators_list.push( symbol1 );
+                            let _ = self.advance();
+                            match &*self.symbol {
+                                Ok(s2) => {
+                                    match &(**s2) {
+                                        Symbols::PyPlusAssign( .. ) |
+                                        Symbols::PyMinusAssign( .. ) |
+                                        Symbols::PyMulAssign( .. ) |
+                                        Symbols::PyPowerAssign( .. ) |
+                                        Symbols::PyModuloAssign( .. ) |
+                                        Symbols::PyMatricesAssign( .. ) |
+                                        Symbols::PyFloorDivAssign( .. ) |
+                                        Symbols::PyDivAssign( .. ) |
+                                        Symbols::PyShiftLeftAssign( .. ) |
+                                        Symbols::PyShiftRightAssign( .. ) |
+                                        Symbols::PyBitwiseAndAssign( .. ) |
+                                        Symbols::PyBitwiseOrAssign( .. ) |
+                                        Symbols::PyBitwiseXorAssign( .. ) |
+                                        Symbols::PyAssign( .. ) |
+                                        Symbols::PySemicolon( .. ) |
+                                        Symbols::Newline( .. ) |
+                                        Symbols::EOF( .. ) |
+                                        Symbols::PyColon( .. ) => false,
+                                        Symbols::PyComma(..) => return Err( Box::new( format!("SyntaxError: ( {} ) - Unexpected double ',' in test list!", self.symbol_position() ).to_string() ) ),
+                                        Symbols::PyMul(..) => {
+                                            nodes_list.push(self.parse_star_expr()?);
+                                            true
+                                        },
+                                        _ => {
+                                            nodes_list.push(self.parse_test()?);
+                                            true
+                                        }
+                                    }
+                                },
+                                _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+                            };
+                            true
+                        },
+                        _ => false
+                    }
+                },
+                _ => return Err( Box::new( format!("SyntaxError: ( {} ) - No Symbols!", self.symbol_position() ).to_string() ) )
+            } {};
+
+        nodes_list.reverse();
+        separators_list.reverse();
+
+        match ( nodes_list.len(), separators_list.len() ) {
+            (1, 0) => {
+                Ok( nodes_list[0].clone() )
+            },
+            _=> Ok( Box::new(AbstractSyntaxNodes::TestListStarExpr(start_pos, self.current_position() - 1, Box::new( nodes_list ), Box::new( separators_list ))) )
+        }
     }
 
     // Rule:

@@ -47,7 +47,7 @@ pub enum AbstractSyntaxNodes {
     NamedExpr               ( u32, u32, Box<AbstractSyntaxNodes>, Box<Symbols>, Box<AbstractSyntaxNodes> ),
     YieldExpr               ( u32, u32, Box<Symbols>, Box<AbstractSyntaxNodes> ),
     YieldFrom               ( u32, u32, Box<Symbols>, Box<Symbols>, Box<AbstractSyntaxNodes>),
-    TestListStarExpr        ( u32, u32, Box<[Box<AbstractSyntaxNodes>]>, Box<[Box<Symbols>]> ),
+    TestListStarExpr        ( u32, u32, Box<Vec<Box<AbstractSyntaxNodes>>>, Box<Vec<Box<Symbols>>> ),
     VarArgsList             ( u32, u32, Option<(Box<Symbols>, Box<AbstractSyntaxNodes>)>, Option<(Box<Symbols>, Box<AbstractSyntaxNodes>)>, Box<[Box<AbstractSyntaxNodes>]>, Box<[Box<Symbols>]>  ),
     VFPDefAssign            ( u32, u32, Box<AbstractSyntaxNodes>, Box<Symbols>, Box<AbstractSyntaxNodes> ),
     TestList                ( u32, u32, Box<Vec<Box<AbstractSyntaxNodes>>>, Box<Vec<Box<Symbols>>> ),
